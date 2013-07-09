@@ -17,6 +17,9 @@
  *
  */
 
+
+#if 0
+
 #include <errno.h>
 #include <string.h>
 #include <sys/types.h>
@@ -32,6 +35,11 @@
 
 #include "../simtrace.h"
 #include "../openpcd.h"
+
+#else
+#include "simtrace_stub.h"
+#endif
+
 
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
 

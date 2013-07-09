@@ -1,4 +1,9 @@
 
+## dependencies: SaleaeDeviceSdk-1.1.14 in the parent directory:
+# cd ..
+# wget http://downloads.saleae.com/SDK/SaleaeDeviceSdk-1.1.14.zip
+# unzip SaleaeDeviceSdk-1.1.14.zip
+
 all: sl-apdu.elf test.run
 
 clean:
@@ -22,3 +27,5 @@ test.run: test.elf
 	bzcat sim-4MHz.bin.bz2 | ./test.elf
 
 
+
+test1: iso7816_uart.o
