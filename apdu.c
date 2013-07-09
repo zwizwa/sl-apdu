@@ -1,3 +1,27 @@
+/* apdu.c - bit stream ISO7816 parser
+ * uses apdu_split to parse APDU bytes -> packets.
+ *
+ * (C) 2013 by Tom Schouten <tom@zwizwa.be>
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License version 2 
+ *  as published by the Free Software Foundation
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ */
+
+/* TODO:
+   - fix hardcoded ATR structure.
+*/
+
+
 #include <stdlib.h>
 #include <stdio.h>
 #include "apdu.h"
@@ -7,7 +31,7 @@
 #include "apdu_split.h"
 
 
-/* ISO7804 interface parser.
+/* ISO7816 interface parser.
    in:  I/O VCC RST
    out: APDU packets */
 
