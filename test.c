@@ -13,7 +13,7 @@ int main(int argc, char **argv) {
     int rv;
 
     int fd = 0;
-    if (1) {
+    if (0) {
         fd = open("sim-4MHz.bin", O_RDONLY);
     }
 
