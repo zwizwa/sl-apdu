@@ -3,6 +3,10 @@
 #include "apdu.h"
 
 
+// APDU splitter code from SIMtrace
+#include "apdu_split.h"
+
+
 /* ISO7804 interface parser.
    in:  I/O VCC RST
    out: APDU packets */
@@ -41,6 +45,9 @@ struct apdu_state {
     uint clock_div;  // master_clock / baud_rate
     uint last_bus;
 
+    /* APDU splitter */
+    struct apdu_split *apdu_split;
+
     /* Bit-level parser state. */
     enum sm_state state;     // current state
     uint delay;      // clock ticks to next action
@@ -56,6 +63,7 @@ struct apdu_state {
     u8 atr_T0;
     u8 atr_TAi;
     u8 atr_TDi;
+
 };
 
 
@@ -65,8 +73,18 @@ static void apdu_div(struct apdu_state *s, uint div) {
     s->clock_div = (s->f_sample * div) / s->f_clock;
 }
 
+
+
+static void apdu_cb(u8 *buf, uint len, void *ctx) {
+    LOG("APDU:");
+    uint i;
+    for (i=0; i<len; i++) LOG(" %02x", buf[i]);
+    LOG("\n");
+}
+
 static void apdu_parse_byte_apdu(struct apdu_state *s, u8 byte) {
-    LOG("%02x ", byte);
+    // LOG("%02x ", byte);
+    apdu_split_in(s->apdu_split, &byte, 1);
 }
 
 
@@ -111,6 +129,7 @@ static void apdu_parse_byte_atr(struct apdu_state *s, u8 byte) {
         uint div = Fi[i_Fi] / Di[i_Di];
         apdu_div(s, div);         // new baud rate
         s->parse_byte = apdu_parse_byte_apdu; // new byte parser
+        apdu_split_reset(s->apdu_split);
         LOG(" -> Clock div %d (%d)\n", div, (s->clock_div));
     }
 }
@@ -118,8 +137,11 @@ static void apdu_parse_byte_atr(struct apdu_state *s, u8 byte) {
 
 static void apdu_reset(struct apdu_state *s) {
     // bit parser
+    /* The ISO-7816 standard states that the ATR will be sent at 372
+       clock cycles per bit.  */
     apdu_div(s, 372);
     s->state = sm_break;
+
     // byte parser
     s->parse_byte = apdu_parse_byte_atr;
     s->atr_bytes = 0;
@@ -254,8 +276,9 @@ struct apdu_state *apdu_new(uint f_sample /* logic analyzer sample frequency */,
     s->f_clock  = f_clock;
     s->f_sample = f_sample;
 
-    /* The ISO-7816 standard states that the ATR will be sent at 372
-       clock cycles per bit.  */
+    s->apdu_split = apdu_split_init(apdu_cb, s);
+
     apdu_reset(s);
+
     return s;
 }
